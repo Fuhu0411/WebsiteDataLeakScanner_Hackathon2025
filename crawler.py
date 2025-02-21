@@ -1,46 +1,55 @@
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import time
+from urllib.parse import urlparse, urljoin
 
-def crawl_website(url, max_pages=50):
-    """Crawl a website but limit pages to prevent overloading"""
-    visited = set()
-    to_visit = [url]
+def extract_external_links(start_url):
+    """Access the starting page once and extract external links classified by scheme,
+    and also include the start URL in the list."""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        response = requests.get(start_url, headers=headers, timeout=5)
+        html = response.text
+    except requests.exceptions.RequestException as e:
+        print(f"[❌] Failed to access {start_url}: {e}")
+        return set(), set()
 
-    print(f"🔍 Starting crawl: {url}\n")
+    soup = BeautifulSoup(html, "html.parser")
+    https_links = set()
+    http_links = set()
 
-    while to_visit and len(visited) < max_pages:
-        current_url = to_visit.pop(0)
+    # Get the domain of the starting URL
+    start_domain = urlparse(start_url).netloc
 
-        if current_url in visited:
-            continue
+    # Check the start URL itself and add it to the appropriate set
+    parsed_start = urlparse(start_url)
+    if parsed_start.scheme.lower() == "https":
+        https_links.add(start_url)
+    elif parsed_start.scheme.lower() == "http":
+        http_links.add(start_url)
 
-        try:
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-            response = requests.get(current_url, headers=headers, timeout=5)
+    # Extract all <a> tags with href attributes from the starting page
+    for link in soup.find_all("a", href=True):
+        full_link = urljoin(start_url, link["href"])
+        parsed_link = urlparse(full_link)
+        scheme = parsed_link.scheme.lower()
+        link_domain = parsed_link.netloc
 
-            # Add a delay to avoid being blocked
-            time.sleep(1)
+        # Only consider external links (different domain)
+        if link_domain and link_domain != start_domain:
+            if scheme == "https":
+                https_links.add(full_link)
+            elif scheme == "http":
+                http_links.add(full_link)
+            # Optionally, ignore other schemes like mailto or javascript
 
-            soup = BeautifulSoup(response.text, "html.parser")
-            visited.add(current_url)
-            print(f"[✅] Found: {current_url}")
-
-            # Extract and add new links
-            for link in soup.find_all("a", href=True):
-                full_link = urljoin(url, link["href"])
-                if full_link.startswith(url) and full_link not in visited:
-                    to_visit.append(full_link)
-
-        except requests.exceptions.RequestException:
-            print(f"[❌] Failed to crawl: {current_url}")
-
-    print(f"\n✅ Crawling completed. Total Pages Crawled: {len(visited)}")
-    # Print discovered links
-    print("\n🔗 Discovered URLs:")
-    for link in visited:
+    print("\n🔗 External HTTPS Links Found:")
+    for link in https_links:
         print(link)
-    return visited
+
+    print("\n⚠️ External HTTP Links Found:")
+    for link in http_links:
+        print(link)
+
+    return https_links, http_links
 
 
