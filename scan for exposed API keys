@@ -1,0 +1,41 @@
+const fs = require('fs');
+const path = require('path');
+
+// Define regex patterns for common API keys
+const apiKeyPatterns = [
+    /AIza[0-9A-Za-z-_]{35}/g, // Google API Key
+    /sk_live_[0-9a-zA-Z]{24}/g, // Stripe Live Key
+    /[0-9a-f]{32}-us[0-9]{1,2}/g, // Mailchimp API Key
+    /ghp_[0-9a-zA-Z]{36}/g, // GitHub Personal Access Token
+    /SG\.[0-9A-Za-z-_]{22}\.[0-9A-Za-z-_]{43}/g, // SendGrid API Key
+];
+
+// Function to scan a directory for JavaScript files
+const scanDirectory = (dir) => {
+    fs.readdirSync(dir).forEach(file => {
+        const fullPath = path.join(dir, file);
+        
+        if (fs.statSync(fullPath).isDirectory()) {
+            scanDirectory(fullPath); // Recursively scan subdirectories
+        } else if (file.endsWith('.js')) {
+            scanFile(fullPath);
+        }
+    });
+};
+
+// Function to scan a file for exposed API keys
+const scanFile = (filePath) => {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    apiKeyPatterns.forEach(pattern => {
+        const matches = content.match(pattern);
+        if (matches) {
+            console.log(`⚠️  Found potential API keys in ${filePath}:`);
+            matches.forEach(match => console.log(`   - ${match}`));
+        }
+    });
+};
+
+// Start scanning from the current directory
+const targetDirectory = './'; // Change this to your project directory if needed
+console.log(`🔍 Scanning directory: ${targetDirectory}`);
+scanDirectory(targetDirectory);
