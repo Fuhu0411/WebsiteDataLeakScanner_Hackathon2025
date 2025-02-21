@@ -42,14 +42,16 @@ def extract_external_links(start_url):
                 http_links.add(full_link)
             # Optionally, ignore other schemes like mailto or javascript
 
-    print("\n🔗 External HTTPS Links Found:")
-    for link in https_links:
-        print(link)
+    #if len(https_links)>0:
+     #   print("\n🔗 External HTTPS Links Found:")
+      #  for link in https_links:
+       #     print(link)
 
-    print("\n⚠️ External HTTP Links Found:")
-    for link in http_links:
-        print(link)
+    if len(http_links)>0:
+        print("\n⚠️ External HTTP Links Found:")
+        for link in http_links:
+            print(link)
 
-    return https_links, http_links
+    return https_links
 
 
