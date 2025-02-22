@@ -30,6 +30,7 @@ def main_file():
 
 
     print(f"\n\n--CHECKING HSTS--\n")
+    #network_security_HSTS.checking_hsts(https_links)
     network_security_HSTS.checking_hsts(https_links)
 
     #network_security_HTTPS.check_https(found_links)
