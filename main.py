@@ -2,6 +2,8 @@ import crawler
 import network_security_HTTPS
 import network_security_Encryption_Protocol
 import network_security_SSL
+import network_security_HSTS
+
 
 def main_file():
     """Ask user for a website URL and check if HTTPS is enabled"""
@@ -25,6 +27,10 @@ def main_file():
     print(f"\n\n--CHECKING SSL CERTIFICATES--\n")
     #Checking https_links for SSL certificates
     network_security_SSL.check_encryption_protocol_for_hosts(https_links)
+
+
+    print(f"\n\n--CHECKING HSTS--\n")
+    network_security_HSTS.checking_hsts(https_links)
 
     #network_security_HTTPS.check_https(found_links)
 
