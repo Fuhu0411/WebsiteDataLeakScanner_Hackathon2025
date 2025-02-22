@@ -5,8 +5,8 @@ import warnings
 # Suppress specific urllib3 warnings related to OpenSSL compatibility
 warnings.filterwarnings("ignore", category=UserWarning, module='urllib3')
 
-# Define the target URL
-url = "https://www.umanitoba.ca/"
+# Define the target URL (make sure it has query parameters)
+url = "https://www.umanitoba.ca/"  # Example without query parameters; modify if needed
 
 # List of common SQL injection payloads
 payloads = [
@@ -23,6 +23,10 @@ def check_sql_injection_in_url(url, payloads):
     # Parse the URL and extract parameters
     parsed_url = urlparse(url)
     params = parse_qs(parsed_url.query)
+
+    if not params:
+        print("No query parameters found in the URL. SQL injection tests cannot be performed.")
+        return
 
     # Check each parameter in the URL for potential SQL injection
     for param, values in params.items():
