@@ -8,6 +8,7 @@ import network_security_Encryption_Protocol
 import network_security_SSL
 import network_security_HSTS
 import network_security_X_FRAME
+import counting_weaknesses
 
 class TextRedirector:
     def __init__(self, widget):
@@ -40,38 +41,46 @@ def run_checks():
     sys.stdout = TextRedirector(text_area)
 
     try:
-        # The total number of potential weaknesses
-        total_po_weaknesses = 0
+
 
         # Crawl for HTTPS links
-        https_links, total_po_weaknesses = crawler.extract_external_links(url)
+        https_links, http_links= crawler.extract_external_links(url)
         if https_links:
             print("🔗 External HTTPS Links Found:")
             for link in https_links:
                 print(link)
         else:
             print("No external HTTPS links found.")
+
+        print(f"\n")
+        if http_links:
+            print("⚠️ External HTTP Links Found:")
+            for link in http_links:
+                print(link)
+        else:
+            print("✅ No external HTTP links found.")
         
         print("\n-- Checking TLS Certificates --")
-        total_po_weaknesses += network_security_Encryption_Protocol.check_encryption_protocol(https_links)
+        network_security_Encryption_Protocol.check_encryption_protocol(https_links)
         print("TLS Certificates check complete.")
         
         print("\n-- Checking SSL Certificates --")
         network_security_SSL.check_encryption_protocol_for_hosts(https_links)
-        total_po_weaknesses += network_security_SSL.potential_weaknesses
         print("SSL Certificates check complete.")
         
         print("\n-- Checking HSTS --")
         network_security_HSTS.checking_hsts(https_links)
-        total_po_weaknesses += network_security_HSTS.potential_weakness
         print("HSTS check complete.")
         
-        print("\n-- Checking X-Frame Options --")
-        total_po_weaknesses += network_security_X_FRAME.checking_x_frame(https_links)
+        print("\n-- Checking X-Frame Options --\n")
+        network_security_X_FRAME.checking_x_frame(https_links)
         print("X-Frame Options check complete.")
 
         print("\nTEST OVER")
-        print(f"⚠️ Number of Potential Weaknesses: {total_po_weaknesses}")
+        print(f"⚠️ Number of Potential Weaknesses: {counting_weaknesses.total_possible_weaknesses}")
+        print(f"Number of HTTP links connected to starter URL: {len(http_links)}")
+        print(f"Number of HTTPs links connected to starter URL: {len(https_links)}")
+        counting_weaknesses.total_possible_weaknesses=0
         
     except Exception as e:
         print(f"\nError occurred: {e}")

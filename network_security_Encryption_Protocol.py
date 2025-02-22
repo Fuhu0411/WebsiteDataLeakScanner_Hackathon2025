@@ -1,6 +1,8 @@
 import ssl
 import socket
 import re
+import counting_weaknesses
+from urllib.parse import urlparse
 
 def clean_domain(url):
     """Extracts the domain name from a full URL."""
@@ -9,9 +11,7 @@ def clean_domain(url):
     url = url.rstrip("/")  # Remove trailing slash if present
     return url
 
-import ssl
-import socket
-from urllib.parse import urlparse
+
 
 def clean_domain(url):
     """Extract and return the domain from a URL."""
@@ -48,20 +48,20 @@ def check_encryption_protocol(https_links):
                 print("✅ Secure: The website is using a modern encryption protocol.")
             elif protocol_used in ["TLSv1.1", "TLSv1.0"]:
                 print("⚠️ WARNING: This website is using an outdated encryption protocol!")
-                potential_weakness+=1
+                counting_weaknesses.total_possible_weaknesses+=1
             else:
                 print("❌ INSECURE: This website might be using an outdated or unknown encryption method.")
-                potential_weakness+=1
+                counting_weaknesses.total_possible_weaknesses+=1
 
         except socket.timeout:
             print(f"[❌] Connection to {domain} timed out.")
-            potential_weakness+=1
+            counting_weaknesses.total_possible_weaknesses+=1
         except ssl.SSLError as e:
             print(f"[❌] SSL Error for {domain}: {e}")
-            potential_weakness+=1
+            counting_weaknesses.total_possible_weaknesses+=1
         except Exception as e:
             print(f"[❌] Could not check encryption for {domain}: {e}")
-            potential_weakness+=1
+            counting_weaknesses.total_possible_weaknesses+=1
 
     return potential_weakness
 

@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
+import counting_weaknesses
 
 def extract_external_links(start_url):
     """Access the starting page once and extract external links classified by scheme,
@@ -11,6 +12,7 @@ def extract_external_links(start_url):
         html = response.text
     except requests.exceptions.RequestException as e:
         print(f"[❌] Failed to access {start_url}: {e}")
+        counting_weaknesses.total_possible_weaknesses+=1
         return set(), set()
 
     soup = BeautifulSoup(html, "html.parser")
@@ -48,10 +50,9 @@ def extract_external_links(start_url):
        #     print(link)
 
     if len(http_links)>0:
-        print("\n⚠️ External HTTP Links Found:")
-        for link in http_links:
-            print(link)
+        counting_weaknesses.total_possible_weaknesses+=1
 
-    return https_links, len(http_links)
+
+    return https_links, http_links
 
 

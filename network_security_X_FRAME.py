@@ -1,4 +1,5 @@
 import requests
+import counting_weaknesses
 
 def check_x_frame_options(url):
     potential_weaknesses=0
@@ -19,10 +20,10 @@ def check_x_frame_options(url):
            
         else:
             print(f"❌ {url}:\n\t X-Frame-Options header not found.\n")
-            potential_weaknesses+=1
+            counting_weaknesses.total_possible_weaknesses+=1
     except Exception as e:
         print(f"❌ Error checking {url}:\n\t {e}\n")
-        potential_weaknesses+=1
+        counting_weaknesses.total_possible_weaknesses+=1
 
     return potential_weaknesses
 

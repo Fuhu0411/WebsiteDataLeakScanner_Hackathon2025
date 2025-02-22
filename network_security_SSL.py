@@ -2,6 +2,7 @@ import ssl
 import socket
 from datetime import datetime
 from urllib.parse import urlparse
+import counting_weaknesses
 
 
 potential_weaknesses=0
@@ -30,7 +31,7 @@ def get_certificate(hostname):
         return cert
     except Exception as e:
         print(f"[❌] Could not get certificate for {hostname}: {e}")
-        potential_weaknesses+=1
+        counting_weaknesses.total_possible_weaknesses+=1
         return None
 
 def check_validity_period(cert):
@@ -45,7 +46,7 @@ def check_validity_period(cert):
         not_after = datetime.strptime(cert['notAfter'], date_format)
     except Exception as e:
         print(f"[❌] Error parsing certificate dates: {e}")
-        potential_weaknesses+=1
+        counting_weaknesses.total_possible_weaknesses+=1
         return
 
     current_time = datetime.utcnow()
@@ -58,7 +59,7 @@ def check_validity_period(cert):
         print("✅ The current time is within the validity period.")
     else:
         print("⚠️ The current time is outside the validity period.")
-        potential_weaknesses+=1
+        counting_weaknesses.total_possible_weaknesses+=1
 
 def check_encryption_protocol_for_hosts(urls):
     """
@@ -80,10 +81,10 @@ def check_encryption_protocol_for_hosts(urls):
                 print(f"   🔄 Encryption Protocol Used: {protocol_used}")
             except Exception as e:
                 print(f"[❌] Could not determine protocol for {hostname}: {e}")
-                potential_weaknesses+=1
+                counting_weaknesses.total_possible_weaknesses+=1
             
             check_validity_period(cert)
         else:
             print(f"[❌] Skipping {hostname} due to certificate retrieval failure.")
-            potential_weaknesses+=1
+            counting_weaknesses.total_possible_weaknesses+=1
 
