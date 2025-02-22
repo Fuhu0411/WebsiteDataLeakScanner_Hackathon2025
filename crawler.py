@@ -52,6 +52,6 @@ def extract_external_links(start_url):
         for link in http_links:
             print(link)
 
-    return https_links
+    return https_links, len(http_links)
 
 

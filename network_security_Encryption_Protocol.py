@@ -19,6 +19,7 @@ def clean_domain(url):
     return parsed.netloc
 
 def check_encryption_protocol(https_links):
+    potential_weakness = 0
     """
     Check the encryption protocol (SSL/TLS) used by a list of HTTPS websites.
     https_links should be a set or list of HTTPS URLs.
@@ -47,14 +48,21 @@ def check_encryption_protocol(https_links):
                 print("✅ Secure: The website is using a modern encryption protocol.")
             elif protocol_used in ["TLSv1.1", "TLSv1.0"]:
                 print("⚠️ WARNING: This website is using an outdated encryption protocol!")
+                potential_weakness+=1
             else:
                 print("❌ INSECURE: This website might be using an outdated or unknown encryption method.")
+                potential_weakness+=1
 
         except socket.timeout:
             print(f"[❌] Connection to {domain} timed out.")
+            potential_weakness+=1
         except ssl.SSLError as e:
             print(f"[❌] SSL Error for {domain}: {e}")
+            potential_weakness+=1
         except Exception as e:
             print(f"[❌] Could not check encryption for {domain}: {e}")
+            potential_weakness+=1
+
+    return potential_weakness
 
 

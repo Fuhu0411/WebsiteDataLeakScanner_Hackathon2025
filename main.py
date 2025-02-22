@@ -3,6 +3,7 @@ import network_security_HTTPS
 import network_security_Encryption_Protocol
 import network_security_SSL
 import network_security_HSTS
+import network_security_X_FRAME
 
 
 def main_file():
@@ -30,9 +31,10 @@ def main_file():
 
 
     print(f"\n\n--CHECKING HSTS--\n")
-    #network_security_HSTS.checking_hsts(https_links)
     network_security_HSTS.checking_hsts(https_links)
 
-    #network_security_HTTPS.check_https(found_links)
+    print(f"\n\n--CHECKING X-FRAME--\n")
+    network_security_X_FRAME.checking_x_frame(https_links)
+
 
 main_file()

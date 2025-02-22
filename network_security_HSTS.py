@@ -1,6 +1,7 @@
 import requests
 import re
 
+potential_weakness =0
 
 def clean_domain(url):
     """Ensure the URL starts with HTTP for testing redirects."""
@@ -27,17 +28,21 @@ def check_http_redirect(url):
                 return redirect_location  # Return the redirected HTTPS URL for HSTS check
             else:
                 print(f"\n⚠️ {url} **redirects, but NOT to HTTPS!** ({redirect_location})")
+                potential_weakness+=1
                 return None
         else:
             print(f"\n❌ {url} **does NOT redirect to HTTPS!**")
+            potential_weakness+=1
             print("   🚨 Users can connect over insecure HTTP, which is a security risk.")
             return None
 
     except requests.exceptions.ConnectionError:
         print(f"[❌] Connection Error: Could not reach {url}.")
+        potential_weakness+=1
         return None
     except requests.exceptions.RequestException as e:
         print(f"[❌] Failed to fetch redirect status for {url}: {e}")
+        potential_weakness+=1
         return None
 
 
@@ -66,13 +71,17 @@ def check_hsts(url):
         else:
             print(f"⚠️ {url} **does NOT enforce HSTS!**")
             print("   ❌ This means users may be vulnerable to MITM attacks if they connect over HTTP.")
+            potential_weakness+=1
 
     except requests.exceptions.SSLError:
         print(f"[❌] SSL Error: {url} may not support HTTPS.")
+        potential_weakness+=1
     except requests.exceptions.ConnectionError:
         print(f"[❌] Connection Error: Could not reach {url}.")
+        potential_weakness+=1
     except requests.exceptions.RequestException as e:
         print(f"[❌] Failed to fetch headers for {url}: {e}")
+        potential_weakness+=1
 
 
 
